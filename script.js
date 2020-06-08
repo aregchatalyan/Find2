@@ -8,26 +8,27 @@ $(function () {
         Q: ['QC', 'QD', 'QH', 'QS'],
         K: ['KC', 'KD', 'KH', 'KS'],
         A: ['AC', 'AD', 'AH', 'AS']
-
     };
 
 
-    for (const [match, names] of Object.entries(obj)) {
+    $.each(obj, (key, value) => {
         for (let i = 0; i < 2; i++) {
-            let name = Math.floor(Math.random() * 4);
 
-            let elem = `
-                    <div class="cards" data-match="${match}">
-                        <img class="front-face" src="img/${names[name]}.png" alt="${names[name]}" />
-                        <img class="back-face" src="img/flipped.png" alt="Card Back" />
-                    </div>`;
-            $('.content').append(elem);
-            console.log(names[name])
+            let imgName = value[Math.floor(Math.random() * 4)];
+            let order = Math.floor(Math.random() * 16);
+            
+            let cards = `
+                <div class="cards" data-match="${key}" style="order: ${order}">
+                    <img class="front-face" src="img/${imgName}.png" alt="${imgName}"/>
+                    <img class="back-face" src="img/flipped.png" alt="Card Back"/>
+                </div>`;
+
+            $('.content').append(cards);
         }
-    }
+    });
 
 
-    const cards = $.find('.cards');
+    $.each($.find('.cards'), (i, card) => $(card).on('click', flip));
 
 
     let flippedCard = false;
@@ -92,22 +93,12 @@ $(function () {
     }
 
 
-    (function shuffle() {
-        $.each(cards, (i, card) => {
-            $(card).css('order', Math.floor(Math.random() * 16).toString());
-        });
-    })();
-
-
-    $.each(cards, (i, card) => $(card).on('click', flip));
-
-
     function endGame() {
         let win = `<h1 id="won">You Won in ${step} Step</h1>`;
 
         $('body').append(win);
         $('.content').css('filter', `blur(${7}px)`);
     };
-})
+});
 
 

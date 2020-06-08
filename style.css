@@ -7,16 +7,17 @@
 body {
   height: 100vh;
   display: flex;
+  align-items: center;
   justify-content: center;
-  background-image: url(img/back.jpg);
+  background: url(img/back.jpg) no-repeat center fixed;
 }
 
 .content {
   width: 768px;
   height: 850px;
-  margin: auto;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-around;
   perspective: 1000px;
 }
@@ -60,5 +61,5 @@ body {
   font-size: 5rem;
   padding: 2rem 1rem;
   position: absolute;
-  top: 41%;
+  top: 42%;
 }
