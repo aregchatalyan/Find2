@@ -1,104 +1,82 @@
-$(function () {
-    let obj = {
-        7: ['7C', '7D', '7H', '7S'],
-        8: ['8C', '8D', '8H', '8S'],
-        9: ['9C', '9D', '9H', '9S'],
-        10: ['10C', '10D', '10H', '10S'],
-        J: ['JC', 'JD', 'JH', 'JS'],
-        Q: ['QC', 'QD', 'QH', 'QS'],
-        K: ['KC', 'KD', 'KH', 'KS'],
-        A: ['AC', 'AD', 'AH', 'AS']
-    };
+$(() => {
+  const suits = ['C', 'D', 'H', 'S'];
+  const ranks = ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+  const $content = $('.content');
+  const totalPairs = ranks.length;
 
+  // --- Generate cards ---
+  const getRandom = max => Math.floor(Math.random() * max);
 
-    $.each(obj, (key, value) => {
-        for (let i = 0; i < 2; i++) {
+  ranks.forEach(rank => {
+    for (let i = 0; i < 2; i++) {
+      const imgName = `${rank}${suits[getRandom(4)]}`;
+      const order = getRandom(totalPairs * 2);
 
-            let imgName = value[Math.floor(Math.random() * 4)];
-            let order = Math.floor(Math.random() * 16);
-            
-            let cards = `
-                <div class="cards" data-match="${key}" style="order: ${order}">
-                    <img class="front-face" src="img/${imgName}.png" alt="${imgName}"/>
-                    <img class="back-face" src="img/flipped.png" alt="Card Back"/>
-                </div>`;
+      const cardHtml = `
+        <div class="cards" data-match="${rank}" style="order: ${order}">
+          <img class="front-face" src="img/${imgName}.png" alt="${imgName}"/>
+          <img class="back-face" src="img/flipped.png" alt="Card Back"/>
+        </div>`;
 
-            $('.content').append(cards);
-        }
-    });
+      $content.append(cardHtml);
+    }
+  });
 
+  // --- Game logic ---
+  let flippedCard = false;
+  let lockCard = false;
+  let firstCard, secondCard;
+  let foundPairs = 0;
+  let steps = 0;
 
-    $.each($.find('.cards'), (i, card) => $(card).on('click', flip));
+  const reset = () => {
+    flippedCard = false;
+    lockCard = false;
+    firstCard = null;
+    secondCard = null;
+  };
 
+  const endGame = () => {
+    $('body').append(`<h1 id="won">You won after ${steps} steps</h1>`);
+    $content.css('filter', 'blur(7px)');
+  };
 
-    let flippedCard = false;
-    let lockCard = false;
-    let firstCard, secondCard;
-    let find = 0, step = 0;
+  const disableCards = () => {
+    $(firstCard).off('click', flip).css('opacity', 0);
+    $(secondCard).off('click', flip).css('opacity', 0);
 
+    foundPairs++;
+    if (foundPairs === totalPairs) endGame();
 
-    function flip() {
-        if (lockCard) return;
-        if (this === firstCard) return;
+    setTimeout(reset, 500); // shorter reset delay
+  };
 
-        $(this).addClass('flip');
+  const unflipCards = () => {
+    lockCard = true;
+    setTimeout(() => {
+      $(firstCard).removeClass('flip');
+      $(secondCard).removeClass('flip');
+      reset();
+    }, 1000);
+  }
 
-        if (!flippedCard) {
-            flippedCard = true;
-            firstCard = this;
-            return;
-        }
-        secondCard = this;
-        check();
+  function flip() {
+    if (lockCard || this === firstCard) return;
+
+    $(this).addClass('flip');
+
+    if (!flippedCard) {
+      flippedCard = true;
+      firstCard = this;
+      return;
     }
 
+    secondCard = this;
+    steps++;
 
-    function check() {
-        step++;
+    const isMatch = firstCard.dataset.match === secondCard.dataset.match;
+    isMatch ? disableCards() : unflipCards();
+  }
 
-        let isMatch = firstCard.dataset.match === secondCard.dataset.match;
-        isMatch ? disable() : unflip();
-    }
-
-
-    function disable() {
-        $(firstCard).off('click', flip);
-        $(secondCard).off('click', flip);
-
-        find++;
-        if (find === 8) endGame();
-
-        setTimeout(() => {
-            $(firstCard).css('opacity', 0);
-            $(secondCard).css('opacity', 0);
-            reset();
-        }, 1700);
-    }
-
-
-    function unflip() {
-        lockCard = true;
-
-        setTimeout(() => {
-            $(firstCard).removeClass('flip');
-            $(secondCard).removeClass('flip');
-            reset();
-        }, 1500);
-    }
-
-
-    function reset() {
-        [flippedCard, lockCard] = [false, false];
-        [firstCard, secondCard] = [null, null];
-    }
-
-
-    function endGame() {
-        let win = `<h1 id="won">You Won in ${step} Step</h1>`;
-
-        $('body').append(win);
-        $('.content').css('filter', `blur(${7}px)`);
-    };
+  $('.cards').on('click', flip);
 });
-
-
