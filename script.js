@@ -42,13 +42,17 @@ $(() => {
   };
 
   const disableCards = () => {
-    $(firstCard).off('click', flip).css('opacity', 0);
-    $(secondCard).off('click', flip).css('opacity', 0);
+    $(firstCard).off('click', flip);
+    $(secondCard).off('click', flip);
 
     foundPairs++;
     if (foundPairs === totalPairs) endGame();
 
-    setTimeout(reset, 500); // shorter reset delay
+    setTimeout(() => {
+      $(firstCard).css('opacity', 0);
+      $(secondCard).css('opacity', 0);
+      reset()
+    }, 1000);
   };
 
   const unflipCards = () => {
